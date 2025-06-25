@@ -1,11 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
-	"syscall/js"
 )
 
 const version = "1.0.0"
@@ -55,24 +56,28 @@ func CalculateRPN(input string) (float64, error) {
 	return stack[0], nil
 }
 
-// calculateRPNJS はJavaScriptから呼び出されるCalculateRPNのラッパーです。
-func calculateRPNJS(this js.Value, args []js.Value) interface{} {
-	if len(args) != 1 {
-		return "Error: Expected one argument (RPN string)"
-	}
-	input := args[0].String()
-	result, err := CalculateRPN(input)
-	if err != nil {
-		return fmt.Sprintf("Error: %v", err)
-	}
-	return result
-}
-
 func main() {
-	// JavaScriptのグローバルスコープにcalculateRPN関数を登録
-	js.Global().Set("calculateRPN", js.FuncOf(calculateRPNJS))
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Println("RPN Calculator (type 'q' to quit)")
 
-	// プログラムが終了しないようにブロック
-	<-make(chan bool)
+	for {
+		fmt.Print("> ")
+		scanner.Scan()
+		input := scanner.Text()
+
+		if input == "q" {
+			break
+		}
+
+		if input == "" {
+			continue
+		}
+
+		result, err := CalculateRPN(input)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			continue
+		}
+		fmt.Println(result)
+	}
 }
-
