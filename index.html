@@ -74,10 +74,10 @@
         const go = new Go();
         let mod, inst;
         WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then(
-            (result) => {
+            async (result) => {
                 mod = result.module;
                 inst = result.instance;
-                go.run(inst);
+                await go.run(inst);
             }
         ).catch((err) => {
             const errorDiv = document.getElementById('error');
